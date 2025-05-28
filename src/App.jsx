@@ -1,82 +1,79 @@
-import { useState, useEffect } from 'react';
-import styles from './app.module.css';
-import data from './data.json';
+import { useState } from 'react';
+import styles from './Calculator.module.css';
 
 export const App = () => {
-	const [steps, setSteps] = useState('')
-	const [activeIndex, setActiveIndex] = useState(0)
+	const [displayValue, setDisplayValue] = useState('');
+	const [firstNumber, setFirstNumber] = useState(null);
+	const [operation, setOperation] = useState(null);
+	const [isResult, setIsResult] = useState(false);
 
-	useEffect(() => {
-        setSteps(data);
-    }, []);
+	const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-	const handleNext = () => {
-        setActiveIndex(activeIndex + 1);
-    };
+	// const numbers = [];
+	// for (let i = 0; i < 10; i++) {
+	// numbers.push(i);
+	// }
 
-    const handlePrev = () => {
-        setActiveIndex(activeIndex - 1);
-    };
+	const operators = ['+', '-', '=', 'C'];
 
-	 const handleStepClick = (index) => {
-        setActiveIndex(index);
-    };
+	const handleNumberClick = (number) => {
+		if (isResult) {
+		setDisplayValue(number.toString());
+		setIsResult(false);
+		} else {
+		setDisplayValue(displayValue + number);
+		}
+	};
 
-    const handleReset = () => {
-        setActiveIndex(0);
-    };
+  	const handleOperatorClick = (operator) => {
+		if (operator === 'C') {
+		setDisplayValue('');
+		setFirstNumber(null);
+		setOperation(null);
+		setIsResult(false);
+		} else if (operator === '=') {
+		if (firstNumber !== null && operation) {
+			const secondNumber = parseInt(displayValue);
+			let result;
+			if (operation === '+') {
+			result = firstNumber + secondNumber;
+			} else if (operation === '-') {
+			result = firstNumber - secondNumber;
+			}
+			setDisplayValue(result.toString());
+			setFirstNumber(result);
+			setOperation(null);
+			setIsResult(true);
+		}
+		} else {
+		if (firstNumber === null) {
+			setFirstNumber(parseInt(displayValue));
+		}
+		setOperation(operator);
+		setDisplayValue('');
+		setIsResult(false);
+    	}
+  	};
 
-	const isFirstStep = activeIndex === 0;
-    const isLastStep = activeIndex === steps.length - 1;
-
-	return (
-		<div className={styles.container}>
-			<div className={styles.card}>
-
-				<h1>Инструкция по готовке пельменей</h1>
-
-				<div className={styles.steps}>
-
-					<div className={styles['steps-content']}>
-                        {steps[activeIndex]?.content}
-                    </div>
-
-					<ul className={styles['steps-list']}>
-                        {steps.map((step, index) => {
-
-                            const isDone = index < activeIndex;
-                            const isActive = index === activeIndex;
-
-                            let itemClasses = `${styles['steps-item']} `;
-
-                            if (isDone) {
-                                itemClasses += `${styles.done} `;
-                            }
-
-                            if (isActive) {
-                                itemClasses += styles.active;
-                            }
-
-                            return (
-                                <li key={step.id} className={itemClasses.trim()}>
-                                    <button className={styles['steps-item-button']} onClick={() => handleStepClick(index)}>
-                                        {index + 1}
-                                    </button>
-									
-                                    {step.title}
-                                </li>
-                            );
-                        })}
-                    </ul>
-
-					<div className={styles['buttons-container']}>
-                        <button className={styles.button} onClick={handlePrev} disabled={isFirstStep}>Назад</button>
-                        <button className={styles.button} onClick={isLastStep ? handleReset : handleNext}>
-                            {isLastStep ? 'Начать сначала' : 'Далее'}
-                        </button>
-                    </div>
-				</div>
-			</div>
-		</div>
-	);
+  	return (
+    	<div className={styles.calculator}>
+      		<div className={styles.display}>
+        		<div className={isResult ? styles.result : styles.input}>
+          		{displayValue || '0'}
+        		</div>
+      		</div>
+      		<div className={styles.buttons}>
+			{numbers.map((number) => (
+				<button key={number} className={styles.button} onClick={() => handleNumberClick(number)}>
+					{number}
+				</button>
+        	))}
+        	{operators.map((operator) => (
+				<button key={operator} className={styles.operator} onClick={() => handleOperatorClick(operator)}>
+					{operator}
+				</button>
+        	))}
+      		</div>
+    	</div>
+  	);
 };
